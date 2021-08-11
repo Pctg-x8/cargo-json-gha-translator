@@ -14,8 +14,12 @@ fn main() {
         .transpose()
     });
 
+    let mut found_error = false;
     for cmd in input_lines {
         let cmd = cmd.expect("Failed to read stdin");
+        found_error = found_error || cmd.is_error();
         println!("{}", cmd);
     }
+
+    std::process::exit(if found_error { 101 } else { 0 });
 }

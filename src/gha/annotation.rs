@@ -42,6 +42,11 @@ impl std::fmt::Display for WorkflowCommand {
         }
     }
 }
+impl WorkflowCommand {
+    pub fn is_error(&self) -> bool {
+        matches!(self, Self::Error { .. })
+    }
+}
 
 impl TryFrom<cargo::jsonfmt::BuildEngineMessage> for WorkflowCommand {
     type Error = ();
