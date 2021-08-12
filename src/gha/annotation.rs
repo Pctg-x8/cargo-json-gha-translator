@@ -1,16 +1,17 @@
 use std::convert::TryFrom;
+use std::path::PathBuf;
 
 use crate::cargo;
 
 pub enum WorkflowCommand {
     Warning {
-        file: String,
+        file: PathBuf,
         line: usize,
         col: usize,
         message: String,
     },
     Error {
-        file: String,
+        file: PathBuf,
         line: usize,
         col: usize,
         message: String,
@@ -27,7 +28,10 @@ impl std::fmt::Display for WorkflowCommand {
             } => write!(
                 fmt,
                 "::warning file={},line={},col={}::{}",
-                file, line, col, message
+                file.display(),
+                line,
+                col,
+                message
             ),
             Self::Error {
                 file,
@@ -37,7 +41,10 @@ impl std::fmt::Display for WorkflowCommand {
             } => write!(
                 fmt,
                 "::error file={},line={},col={}::{}",
-                file, line, col, message
+                file.display(),
+                line,
+                col,
+                message
             ),
         }
     }
@@ -64,7 +71,9 @@ impl TryFrom<cargo::jsonfmt::BuildEngineMessage> for WorkflowCommand {
                 let span = spans.pop().unwrap();
 
                 Ok(Self::Warning {
-                    file: span.file_name,
+                    file: std::env::current_dir()
+                        .expect("Failed to get current dir")
+                        .join(span.file_name),
                     line: span.line_start,
                     col: span.column_start,
                     message,
@@ -81,7 +90,9 @@ impl TryFrom<cargo::jsonfmt::BuildEngineMessage> for WorkflowCommand {
                 let span = spans.pop().unwrap();
 
                 Ok(Self::Error {
-                    file: span.file_name,
+                    file: std::env::current_dir()
+                        .expect("Failed to get current dir")
+                        .join(span.file_name),
                     line: span.line_start,
                     col: span.column_start,
                     message,
